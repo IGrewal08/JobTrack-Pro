@@ -7,3 +7,101 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  INTERVIEWING
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
+enum JobType {
+  INTERNSHIP
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+}
+
+model User {
+  id            String                 @id @default(cuid())
+  createdAt     DateTime            @default(now())
+  email         String              @unique
+  name          String?             @default("User")
+  password      String    
+  role          Role                @default(USER)
+
+  applications  Application[]
+  scrapeFilter  ScrapeFilter?
+}
+
+model Job {
+  id            Int                 @id @default(autoincrement())
+  createdAt     DateTime            @default(now())
+
+  title         String              @db.VarChar(255)
+  company       String              @db.VarChar(255)
+  location      String?             @db.VarChar(255)
+  remote        Boolean             @default(false)
+  jobType       JobType?
+  salaryMin     Int?
+  salaryMax     Int?
+  description   String              @db.Text
+  url           String              @unique @db.VarChar(2048)
+  source        String              @db.VarChar(100)
+  hash          String              @unique @db.VarChar(64) // (title+company+url)
+  tags          String[] // replace with @@index([tags]) for heavy filtering
+  postedAt      DateTime?
+  expiresAt     DateTime?
+
+  applications  Application[]
+
+  @@index([company])
+  @@index([createdAt])
+}
+
+model Application {
+  id            String              @id @default(cuid())
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  status        ApplicationStatus   @default(SAVED)
+  appliedAt     DateTime?
+  interviewAt   DateTime?
+  offerAmount   Int?
+
+  notes         String?             @db.Text
+  coverLetter   String?             @db.Text
+
+  userId        String
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobId         Int
+  job           Job                 @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+  @@index([userId, status])
+}
+
+model ScrapeFilter {
+  id            String                 @id @default(cuid())
+  createdAt     DateTime            @default(now())
+  updateAt      DateTime            @updatedAt
+
+  keywords      String[]
+  location      String?
+  remoteOnly    Boolean             @default(false)
+  jobTypes      JobType[]
+  salaryMin     Int?
+  lastScrapedAt DateTime?
+
+  userId        String              @unique
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
