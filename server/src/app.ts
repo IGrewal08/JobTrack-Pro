@@ -1,8 +1,10 @@
-import express, { type Application, type Request, type Response, type ErrorRequestHandler, type NextFunction } from "express";
+import type { Application, Request, Response, NextFunction } from "express";
+import express from "express";
 import { authRouter } from "./routes/auth.routes.js";
 import { applicationRouter } from "./routes/application.routes.js";
 import { jobsRouter } from "./routes/jobs.routes.js";
 import { verifyToken } from "./middleware/auth.js";
+import { errorHandler } from "./middleware/errorHandler.js";
 
 const app: Application = express();
 
@@ -14,14 +16,7 @@ app.use(verifyToken);
 app.use('/api/application', applicationRouter);
 app.use('api/jobs', jobsRouter);
 
-app.use((req: Request, res: Response) => {
-    res.status(404).send("Error 404! Page not found.");
-});
-
-app.use((err: ErrorRequestHandler, req: Request, res: Response, next: NextFunction) => {
-    console.error(err);
-    res.status(500).send("Error from server side.");
-});
+app.use(errorHandler);
 
 const PORT = Number(process.env.PORT) || 3000;
 app.listen(PORT, "localhost", (error) => {
