@@ -1,5 +1,7 @@
 import express, { type Application, type Request, type Response, type ErrorRequestHandler, type NextFunction } from "express";
 import { authRouter } from "./routes/auth.routes.js";
+import { applicationRouter } from "./routes/application.routes.js";
+import { verifyToken } from "./middleware/auth.js";
 
 const app: Application = express();
 
@@ -7,7 +9,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/login', authRouter);
-//app.use('/api/application', application.routes);
+app.use(verifyToken);
+app.use('/api/application', applicationRouter);
 //app.use('api/jobs', jobs.routes);
 
 app.use((req: Request, res: Response) => {
