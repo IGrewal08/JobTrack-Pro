@@ -11,6 +11,9 @@ export const loginController = async (req: Request, res: Response) => {
         if (!email) {
             return res.status(401).json({ message: "Invalid Email or Password." });
         }
+        if (!user) {
+            return res.status(401).json({ message: "Authentication failed" });
+        }
 
         const match: boolean = await bcrypt.compare(password, user.password);
 

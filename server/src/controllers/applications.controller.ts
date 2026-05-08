@@ -1,9 +1,14 @@
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
+import { prisma } from "../config/prisma.js";
 
 export const applicationController = {
-    
-    getById: (req: Request, res: Response) => {
-
+    getById: (req: Request, res: Response, next: NextFunction) => {
+        try {
+            
+        } catch (err: any) {
+            console.error(`[Error] ${err.statusCode}`);
+            next();
+        }
     },
 
     

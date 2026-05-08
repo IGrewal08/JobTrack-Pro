@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use('/api/login', authRouter);
-app.use(verifyToken);
+app.use(verifyToken); // TODO
 app.use('/api/application', applicationRouter);
 app.use('api/jobs', jobsRouter);
 
