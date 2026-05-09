@@ -1,38 +1,127 @@
 import type { NextFunction, Request, Response } from "express";
-import { prisma } from "../config/prisma.js";
+import { applicationService, parseStatus } from "@/services/application.services.js";
+
+interface AuthRequest<T = any> extends Request<T> {
+    user?: {
+        id: string;
+        status?: string;
+    }
+}
 
 export const applicationController = {
-    getById: (req: Request, res: Response, next: NextFunction) => {
+
+    getById: async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            
-        } catch (err: any) {
-            console.error(`[Error] ${err.statusCode}`);
-            next();
+            const application = await applicationService.getById(req.params.id);
+            if (!application) return res.status(404).json({ message: "Application not found." });
+            return res.status(200).json(application);
+        } catch (err) {
+            next(err);
+        }
+    },
+    
+    list: async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.id;
+            if (!userId) return res.status(401).json({ message: "Unauthorized." });
+
+            const rawTags = req.query.tags;
+            const tags: string[] = 
+            Array.isArray(rawTags) ? (rawTags as string[]) : typeof rawTags === "string" ? rawTags.split(",") : [];
+
+            const { company, location, updatedAt, createdAt } = req.query;
+
+            const remote = 
+            req.query.remote === "true" ? true : req.query.remote === "false" ? false : undefined;
+
+            const rawUpdateData = {
+                status: status ? parseStatus(req.query.status) : undefined,
+                company: typeof company === "string" ? company : undefined,
+                location: typeof location === "string"? location : undefined,
+                remote,
+                tags,
+                createdAt: createdAt === "asc" || createdAt === "desc" ? createdAt : undefined,
+                updatedAt: updatedAt === "asc" || updatedAt === "desc" ? updatedAt : undefined,
+            }
+
+            const cleanUpdateData = Object.fromEntries(
+                Object.entries(rawUpdateData).filter(([_, value]) => value !== undefined)
+            );
+
+            const applications = await applicationService.list(userId, cleanUpdateData);
+
+            return res.status(200).json(applications);
+        } catch (err) {
+            next(err);
+        }
+    },
+
+    create: async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.id;
+            if (!userId) return res.status(401).json({ message: "Unauthorized." });
+
+            const { jobId, appliedAt, interviewAt, offerAmount } = req.body;
+            if (!jobId) return res.status(400).json({ message: "jobId is required." });
+
+            const rawUpdateData = {
+                status: status ? parseStatus(req.body.status) : undefined,
+                appliedAt: appliedAt ? new Date(appliedAt) : undefined,
+                interviewAt: interviewAt ? new Date(interviewAt) : undefined,
+                offerAmount: offerAmount ? Number(offerAmount) : undefined,
+                notes: req.body.notes,
+                coverLetter: req.body.coverLetter,
+            }
+
+            const cleanUpdateData = Object.fromEntries(
+                Object.entries(rawUpdateData).filter(([_, value]) => value !== undefined)
+            );
+
+            const application = await applicationService.create(userId, Number(jobId), cleanUpdateData);
+
+            return res.status(200).json(application);
+        } catch (err) {
+            next(err);
         }
     },
 
     
-    list: (req: Request, res: Response) => {
+    update: async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.id;
+            if (!userId) return res.status(401).json({ message: "Unauthorized." });
 
+            const { appliedAt, interviewAt, offerAmount } = req.body;
+
+            const rawUpdateData = {
+                status: status ? parseStatus(req.body.status) : undefined,
+                appliedAt: appliedAt ? new Date(appliedAt) : undefined,
+                interviewAt: interviewAt ? new Date(interviewAt) : undefined,
+                offerAmount: offerAmount ? Number(offerAmount) : undefined,
+                notes: req.body.notes,
+                coverLetter: req.body.coverLetter,
+            }
+
+            const cleanUpdateData = Object.fromEntries(
+                Object.entries(rawUpdateData).filter(([_, value]) => value !== undefined)
+            );
+ 
+            const application = await applicationService.update(req.params.id, userId, cleanUpdateData);
+
+            res.status(200).json(application);
+        } catch (err) {
+            next(err);
+        }
     },
 
-    
-    search: (req: Request, res: Response) => {
-
-    },
-
-    
-    create: (req: Request, res: Response) => {
-
-    },
-
-    
-    update: (req: Request, res: Response) => {
-
-    },
-
-    
-    remove: (req: Request, res: Response) => {
-        
+    remove: async (req: AuthRequest, res: Response, next: NextFunction) => {
+        try {
+            const userId = req.user?.id;
+            if (!userId) return res.status(401).json({ message: "Unauthorized." });
+            await applicationService.remove(req.params.id, userId);
+            return res.status(204).send();
+        } catch (err) {
+            next(err);
+        }
     },
 };
