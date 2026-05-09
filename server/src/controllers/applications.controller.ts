@@ -12,7 +12,9 @@ export const applicationController = {
 
     getById: async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
-            const application = await applicationService.getById(req.params.id);
+            const id = req.params.id;
+            if (!id) return res.status(201).json({ message: "" });
+            const application = await applicationService.getById(id);
             if (!application) return res.status(404).json({ message: "Application not found." });
             return res.status(200).json(application);
         } catch (err) {
@@ -27,12 +29,12 @@ export const applicationController = {
 
             const rawTags = req.query.tags;
             const tags: string[] = 
-            Array.isArray(rawTags) ? (rawTags as string[]) : typeof rawTags === "string" ? rawTags.split(",") : [];
+                Array.isArray(rawTags) ? (rawTags as string[]) : typeof rawTags === "string" ? rawTags.split(",") : [];
 
-            const { company, location, updatedAt, createdAt } = req.query;
+            const { status, company, location, updatedAt, createdAt } = req.query;
 
             const remote = 
-            req.query.remote === "true" ? true : req.query.remote === "false" ? false : undefined;
+                req.query.remote === "true" ? true : req.query.remote === "false" ? false : undefined;
 
             const rawUpdateData = {
                 status: status ? parseStatus(req.query.status) : undefined,
@@ -61,11 +63,11 @@ export const applicationController = {
             const userId = req.user?.id;
             if (!userId) return res.status(401).json({ message: "Unauthorized." });
 
-            const { jobId, appliedAt, interviewAt, offerAmount } = req.body;
+            const { status, jobId, appliedAt, interviewAt, offerAmount } = req.body;
             if (!jobId) return res.status(400).json({ message: "jobId is required." });
 
-            const rawUpdateData = {
-                status: status ? parseStatus(req.body.status) : undefined,
+            const rawCreateData = {
+                status: status ? parseStatus(status) : undefined,
                 appliedAt: appliedAt ? new Date(appliedAt) : undefined,
                 interviewAt: interviewAt ? new Date(interviewAt) : undefined,
                 offerAmount: offerAmount ? Number(offerAmount) : undefined,
@@ -73,11 +75,11 @@ export const applicationController = {
                 coverLetter: req.body.coverLetter,
             }
 
-            const cleanUpdateData = Object.fromEntries(
-                Object.entries(rawUpdateData).filter(([_, value]) => value !== undefined)
+            const cleanCreateData = Object.fromEntries(
+                Object.entries(rawCreateData).filter(([_, value]) => value !== undefined)
             );
 
-            const application = await applicationService.create(userId, Number(jobId), cleanUpdateData);
+            const application = await applicationService.create(userId, Number(jobId), cleanCreateData);
 
             return res.status(200).json(application);
         } catch (err) {
@@ -91,7 +93,7 @@ export const applicationController = {
             const userId = req.user?.id;
             if (!userId) return res.status(401).json({ message: "Unauthorized." });
 
-            const { appliedAt, interviewAt, offerAmount } = req.body;
+            const { status, appliedAt, interviewAt, offerAmount } = req.body;
 
             const rawUpdateData = {
                 status: status ? parseStatus(req.body.status) : undefined,
@@ -119,6 +121,7 @@ export const applicationController = {
             const userId = req.user?.id;
             if (!userId) return res.status(401).json({ message: "Unauthorized." });
             await applicationService.remove(req.params.id, userId);
+
             return res.status(204).send();
         } catch (err) {
             next(err);

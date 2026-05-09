@@ -2,7 +2,7 @@ import type { Application, Request, Response, NextFunction } from "express";
 import express from "express";
 import { authRouter } from "./routes/auth.routes.js";
 import { applicationRouter } from "./routes/application.routes.js";
-import { jobsRouter } from "./routes/jobs.routes.js";
+import { jobRouter } from "./routes/job.routes.js";
 import { verifyToken } from "./middleware/auth.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 
@@ -14,7 +14,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/login', authRouter);
 app.use(verifyToken); // TODO
 app.use('/api/application', applicationRouter);
-app.use('api/jobs', jobsRouter);
+app.use('api/jobs', jobRouter);
 
 app.use(errorHandler);
 

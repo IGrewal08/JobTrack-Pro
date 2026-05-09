@@ -8,6 +8,15 @@ export function parseStatus(value: unknown): ApplicationStatus | undefined {
     return undefined;
 }
 
+type ApplicationWriteDate = {
+    status?: ApplicationStatus;
+    appliedAt?: Date;
+    interviewAt?: Date;
+    offerAmount?: number;
+    notes?: string;
+    coverLetter?: string;
+}
+
 export const applicationService = {
     
     getById: async (id: string) => {
@@ -31,42 +40,32 @@ export const applicationService = {
       tags?: string[];
       createdAt?: Prisma.SortOrder;
       updatedAt?: Prisma.SortOrder;
-    }
-  ) => {
-    return prisma.application.findMany({
-      where: {
-        userId,
-        ...(filters.status && { status: filters.status }),
-        job: {
-            ...(filters.company && { company: filters.company }),
-            ...(filters.location && { location: filters.location }),
-            ...(filters.remote !== undefined && { remote: filters.remote }),
-            ...(filters.tags && filters.tags.length > 0 && {
-                tags: { hasSome: filters.tags }
-            }),
+    }) => {
+        return prisma.application.findMany({
+        where: {
+            userId,
+            ...(filters.status && { status: filters.status }),
+            job: {
+                ...(filters.company && { company: filters.company }),
+                ...(filters.location && { location: filters.location }),
+                ...(filters.remote !== undefined && { remote: filters.remote }),
+                ...(filters.tags && filters.tags.length > 0 && { tags: { hasSome: filters.tags }}),
+            },
         },
-      },
-      include: { 
-        job: true 
-      },
-      orderBy: [
-        ...(filters.createdAt ? [{ createdAt: filters.createdAt }] : []),
-        ...(filters.updatedAt ? [{ updatedAt: filters.updatedAt }] : []),
-      ],
-    });
-  },
+        include: { 
+            job: true 
+        },
+        orderBy: [
+            ...(filters.createdAt ? [{ createdAt: filters.createdAt }] : []),
+            ...(filters.updatedAt ? [{ updatedAt: filters.updatedAt }] : []),
+        ],
+        });
+    },
 
     create: async (
         userId: string,
         jobId: number,
-        data: {
-            status?: ApplicationStatus;
-            appliedAt?: Date;
-            interviewAt?: Date;
-            offerAmount?: number;
-            notes?: string;
-            coverLetter?: string;
-        }
+        data: ApplicationWriteDate
     ) => {
         return await prisma.application.create({
             data: {
@@ -83,14 +82,7 @@ export const applicationService = {
     update: async (
         id: string,
         userId: string,
-        data: {
-            status?: ApplicationStatus;
-            appliedAt?: Date;
-            interviewAt?: Date;
-            offerAmount?: number;
-            notes?: string;
-            coverLetter?: string;
-        }
+        data: Partial<ApplicationWriteDate>
     ) => {
         return prisma.application.update({
             where: {
