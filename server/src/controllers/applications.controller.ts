@@ -108,7 +108,7 @@ export const applicationController = {
  
             const application = await applicationService.update(req.params.id, userId, cleanUpdateData);
 
-            res.status(200).json(application);
+            return res.status(200).json(application);
         } catch (err) {
             next(err);
         }
