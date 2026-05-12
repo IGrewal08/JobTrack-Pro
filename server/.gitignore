@@ -3,3 +3,8 @@ node_modules
 .env
 
 /generated/prisma
+
+src/prisma.config.d.ts
+prisma.config.d.js
+prisma.config.js.map
+prisma.config.d.ts.map
