@@ -13,5 +13,5 @@ export async function action() {
 
 export default function BoardPage() {
     const applications = useLoaderData();
-    return <KanbanBoard applications={applications} />;
+    return <KanbanBoard applications={applications} />; // Only return array of items
 }
