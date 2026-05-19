@@ -1,5 +1,3 @@
-import Header from "../components/Header";
-import Footer from "../components/Footer";
 import { redirect } from "react-router";
 
 export async function loader() {

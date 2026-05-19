@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import type { DragEvent } from "react";
 import { KanbanColumn } from "./KanbanColumn";
 
 type Column = Applications[];
@@ -40,6 +41,11 @@ type Individual = {
     applications: Applications[];
 }
 
+type DraggedObject = {
+    id: string;
+    columnId: string;
+}
+
 const initialColumns: Columns = {
     saved: { id: "Saved", title: "Saved", applications: [] },
     applied: { id: "Applied", title: "Applied", applications: [] },
@@ -57,7 +63,7 @@ export default function KanbanBoard(apps: Applications[]) {
 
     const [applications, setApplications] = useState(apps);
     const [columns, setColumns] = useState(initialColumns);
-    const [draggedItem, setDraggedItem] = useState(null);
+    const [draggedItem, setDraggedItem] = useState<DraggedObject | null>(null);
 
     useEffect(() => {
         // Separate applications by their status into columns
@@ -87,41 +93,45 @@ export default function KanbanBoard(apps: Applications[]) {
         setColumns(newColumns);
     }, [applications]);
 
-    const removeTask = (columnId: {}, taskId: string) => {
+    const removeTask = (columnId: string, taskId: string) => {
         const updatedColumns = {...columns};
 
-        updatedColumns[columnId].apps = updatedColumns[columnId].apps.
-        filter((app: string) => app.id !== taskId);
-        // function call to action (delete user from id)
-    }
-
-    const handleDragStart = (columnId: number, item: Object) => {
-    }
-
-    const handleDragOver = (e: Event) => {
-        e.preventDefault();
-    }
-
-    const handleDrop = (e: Event, columnId: number) => {
-        e.preventDefault();
-
-        if (!draggedItem) return;
-        
-        const {columnId: sourceColumnId, item} = draggedItem;
-
-        if (sourceColumnId === columnId) return;
-
-        const updatedColumns = {...columns};
-
-        updatedColumns[sourceColumnId].apps = updatedColumns;
-        [sourceColumnId].apps.filter((i: string) => i.id != item.id);
-
-        updatedColumns[columnId].items.push(item);
-
+        updatedColumns[columnId].applications = updatedColumns[columnId].applications.
+        filter(app => app.id !== taskId);
         setColumns(updatedColumns);
-        setDraggedItem(null);
-
+        // call backend (delete userid from application)
     }
+
+    const handleDragStart = (e: DragEvent<HTMLLIElement>, id: string, columnId: string): void => {
+        setDraggedItem({ id, columnId });
+    }
+
+    const handleDragOver = (e: DragEvent<HTMLDivElement>): void => {
+        e.preventDefault();
+    }
+
+    const handleDrop = (e: DragEvent<HTMLDivElement>, targetId: string): void => {
+        e.preventDefault();
+
+        if (!draggedItem || draggedItem.id !== targetId) return;
+
+        if (!draggedItem.columnId && !targetId) { // check if the source and target column exist
+            const updatedColumns = {...columns};
+            const movedApp = updatedColumns[draggedItem.columnId].applications.find(app => app.id === draggedItem.id);
+
+
+            if (movedApp) {
+                updatedColumns[draggedItem.columnId].applications = updatedColumns[draggedItem.columnId].applications.
+                    filter(app => app.id != draggedItem.id); // remove task from source column
+
+                updatedColumns[targetId].applications.push(movedApp); // add task to target column
+                // call backend to update item status
+                setColumns(updatedColumns);
+            }
+        }
+        setDraggedItem(null);
+    }
+
 
     return (
         <>
@@ -131,6 +141,8 @@ export default function KanbanBoard(apps: Applications[]) {
                     <KanbanColumn 
                         data={column} 
                         handleDrop={handleDrop}
+                        handleDragStart={handleDragStart}
+                        handleDragOver={handleDragOver}
                     />
                 </li>
                 ))}
