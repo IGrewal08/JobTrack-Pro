@@ -1,4 +1,5 @@
 import type { DragEvent } from "react";
+
 type Props = {
     data: Data;
     handleDrop: (e: DragEvent<HTMLDivElement>, id: string) => void;

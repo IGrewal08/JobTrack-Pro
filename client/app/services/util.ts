@@ -12,7 +12,7 @@ export function decodeToken(token: string | null) {
     }
 }
 
-export function isTokeExpired(token: string | null, bufferSeconds = 30) {
+export function isTokenExpired(token: string | null, bufferSeconds = 30) {
     if (!token) return true;
     const payload = decodeToken(token);
     if (!payload?.exp) return true;
@@ -26,7 +26,7 @@ export function clearToken() { localStorage.removeItem(TOKEN_KEY); }
 
 export function getValidToken(): null | string {
     const token = loadToken();
-    if (!token || isTokeExpired(token)) {
+    if (!token || isTokenExpired(token)) {
         clearToken();
         return null;
     }

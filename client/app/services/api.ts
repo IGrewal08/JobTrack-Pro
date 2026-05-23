@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { clearToken, decodeToken, getValidToken, storeToken } from "./util";
 
-const API_BASE = "http://localhost/3000";
+export const API_BASE = "http://localhost:3000";
 
 export function useAuth() {
-    const [user, setUser] = useState<string | null>(null);
+    const [user, setUser] = useState<Record <string, any> | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [error, setError] = useState<string | null>(null);
 
     // Check for existing token on initial load
     useEffect(() => {
@@ -23,11 +23,10 @@ export function useAuth() {
     const login = useCallback(async (email: string, password: string) => {
         setError(null);
         setLoading(true);
-
         try { 
             const response = await fetch(`${API_BASE}/auth/login`, {
                 method: 'POST',
-                headers: { "Content-Type": "application/json" },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
             });
 
@@ -84,7 +83,8 @@ export function useAuth() {
             const body = await response.json().catch(() => ({}));
             throw new Error(body.message ?? `Request failed (${response.status})`);
         }
-        return response.json; // valid response
+
+        return await response.json(); // valid response
     }, [logout]);
 
     return {user, token, loading, error, login, logout, authRequest }
