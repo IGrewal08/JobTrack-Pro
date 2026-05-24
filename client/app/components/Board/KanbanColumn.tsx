@@ -1,50 +1,43 @@
 import type { DragEvent } from "react";
+import type { Application } from "../../types";
+
+type ColumnData = { 
+    id: string;
+    title: string;
+    applications: Application[]
+};
 
 type Props = {
-    data: Data;
-    handleDrop: (e: DragEvent<HTMLDivElement>, id: string) => void;
-    handleDragStart: (e: DragEvent<HTMLLIElement>, id: string, columnId: string) => void;
-    handleDragOver: (e: DragEvent<HTMLDivElement>) => void;
+    data: ColumnData;
+    onDrop: (e: DragEvent<HTMLDivElement>, columnId: string) => void;
+    onDragStart: (e: DragEvent<HTMLLIElement>, id: string, columnId: string) => void;
+    onDragOver: (e: DragEvent<HTMLDivElement>) => void;
+    onRemove: (columnId: string, taskId: string) => void;
 }
 
-type Data = {
-    id: string;
-    title: string;
-    applications: Applications[];
-}
-
-type Applications = {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    title: string;
-    company: string;
-    jobType: string;
-    status: string;
-}
-
-export function KanbanColumn(props: Props) {
+export function KanbanColumn({ data, onDrop, onDragStart, onDragOver, onRemove }: Props) {
     // on click, go to job posting, on drag allow drag and drop
     return (
-        <>
-            <div 
-                onDragOver={(e) => props.handleDragOver(e)}
-                onDrop={(e) => props.handleDrop(e, props.data.id)}
-                >
-                <div id="title">{props.data.title}</div>
-            <ul>
-                {props.data.applications.map(app => (
-                    <li key={app.id} 
+        <div 
+            onDragOver={onDragOver}
+            onDrop={(e) => onDrop(e, data.id)}
+            style={{ minWidth: "200px", minHeight: "300px" }}
+        >
+            <h3>{data.title}</h3>
+            <ul style={{ listStyle: "none", padding: 0 }}>
+                {data.applications.map(app => (
+                    <li 
+                        key={app.id} 
                         draggable
-                        onDragStart={(e) => props.handleDragStart(e, app.id, props.data.id)}
+                        onDragStart={(e) => onDragStart(e, app.id, data.id)}
                     >
                         <div>{app.title}</div>
                         <div>{app.company}</div>
-                        <div>{app.createdAt}</div>
+                        <div>{new Date(app.createdAt).toLocaleDateString()}</div>
+                        <button onClick={() => onRemove(data.id, app.id)}>Remove</button>
                     </li>
                 ))}
             </ul>
-            </div>
-        </>
-    )
+        </div>
+    );
 }

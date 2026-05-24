@@ -1,152 +1,110 @@
 import { useEffect, useState } from "react";
 import type { DragEvent } from "react";
 import { KanbanColumn } from "./KanbanColumn";
+import { useAuthContext } from "../../context/AuthContext";
+import type { Application, Columns, DraggedObject } from "../../types";
 
-type Column = Applications[];
+const COLUMN_KEYS = ["saved", "applied", "interviewing", "offers", "rejected", "withdrawn"];
 
-type Applications = {
-    id: string;
-    createdAt: string;
-    updatedAt: string;
-    title: string;
-    company: string;
-    jobType: string;
-    status: string;
-}
+const buildInitialColumns = (): Columns => 
+    Object.fromEntries(
+        COLUMN_KEYS.map(key => [key, { id: key, title: key.charAt(0).toUpperCase() + key.slice(1), applications: [] }])
+    );
 
-const columnApps: {
-    saved: Column;
-    applied: Column;
-    interviewing: Column;
-    offers: Column;
-    rejected: Column;
-    withdrawn: Column;
-    [key: string]: Column; // Dynamic lookup error below
-} = { 
-    saved: [], 
-    applied: [], 
-    interviewing: [], 
-    offers: [], 
-    rejected: [], 
-    withdrawn: [] 
-};
+type Props = { applications: Application[] };
 
-type Columns = {
-    [key: string]: Individual;
-}
-
-type Individual = {
-    id: string;
-    title: string;
-    applications: Applications[];
-}
-
-type DraggedObject = {
-    id: string;
-    columnId: string;
-}
-
-const initialColumns: Columns = {
-    saved: { id: "Saved", title: "Saved", applications: [] },
-    applied: { id: "Applied", title: "Applied", applications: [] },
-    interviewing: { id: "Interviewing", title: "Interviewing", applications: [] },
-    offers: { id: "Offers", title: "Offers", applications: [] },
-    rejected: { id: "Rejected", title: "Rejected", applications: [] },
-    withdrawn: { id: "Withdrawn", title: "Withdrawn", applications: [] },
-}
-
-export async function action() {
-
-}
-
-export default function KanbanBoard(apps: Applications[]) {
-
-    const [applications, setApplications] = useState(apps);
-    const [columns, setColumns] = useState(initialColumns);
+export default function KanbanBoard({ applications }: Props) {
+    const { authRequest } = useAuthContext();
+    const [columns, setColumns] = useState<Columns>(buildInitialColumns);
     const [draggedItem, setDraggedItem] = useState<DraggedObject | null>(null);
 
     useEffect(() => {
-        // Separate applications by their status into columns
-        const columnApps: Record<string, Applications[]> = { 
-            saved: [], 
-            applied: [], 
-            interviewing: [], 
-            offers: [], 
-            rejected: [], 
-            withdrawn: [],
-        }
-
-        apps.forEach(app => {
-            if (columnApps[app.status]) {
-                columnApps[app.status].push(app);
-            }
+        const grouped: Record<string, Application[]> = Object.fromEntries(COLUMN_KEYS.map(k => [k, []]));
+        applications.forEach(app => {
+            const key = app.status.toLowerCase();
+            if (grouped[key]) grouped[key].push(app);
         });
-
-        setApplications(apps);
-        const newColumns = { ... columns };
-        Object.keys(newColumns).forEach(key => {
-            newColumns[key] = {
-                ...newColumns[key],
-                applications: columnApps[key] || []
-            };
+        setColumns(prev => {
+            const next = { ...prev };
+            COLUMN_KEYS.forEach(key => { next[key] = { ...next[key], applications: grouped[key] }; });
+            return next;
         });
-        setColumns(newColumns);
     }, [applications]);
 
-    const removeTask = (columnId: string, taskId: string) => {
-        const updatedColumns = {...columns};
-
-        updatedColumns[columnId].applications = updatedColumns[columnId].applications.
-        filter(app => app.id !== taskId);
-        setColumns(updatedColumns);
-        // call backend (delete userid from application)
-    }
-
-    const handleDragStart = (e: DragEvent<HTMLLIElement>, id: string, columnId: string): void => {
+    const handleDragStart = (e: DragEvent<HTMLLIElement>, id: string, columnId: string) => {
         setDraggedItem({ id, columnId });
-    }
+    };
 
-    const handleDragOver = (e: DragEvent<HTMLDivElement>): void => {
+    const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
         e.preventDefault();
-    }
+    };
 
-    const handleDrop = (e: DragEvent<HTMLDivElement>, targetId: string): void => {
+    const handleDrop = async (e: DragEvent<HTMLDivElement>, targetColumnId: string) => {
         e.preventDefault();
 
-        if (!draggedItem || draggedItem.id !== targetId) return;
-
-        if (!draggedItem.columnId && !targetId) { // check if the source and target column exist
-            const updatedColumns = {...columns};
-            const movedApp = updatedColumns[draggedItem.columnId].applications.find(app => app.id === draggedItem.id);
-
-
-            if (movedApp) {
-                updatedColumns[draggedItem.columnId].applications = updatedColumns[draggedItem.columnId].applications.
-                    filter(app => app.id != draggedItem.id); // remove task from source column
-
-                updatedColumns[targetId].applications.push(movedApp); // add task to target column
-                // call backend to update item status
-                setColumns(updatedColumns);
-            }
+        // early return for no drop, or drop on same column
+        if (!draggedItem || draggedItem.columnId !== targetColumnId) {
+            setDraggedItem(null);
+            return;
         }
-        setDraggedItem(null);
-    }
+        const { id, columnId: sourceColumnId } = draggedItem;
+        const movedApp = columns[sourceColumnId]?.applications.find(app => app.id === id);
+        if (!movedApp) { setDraggedItem(null); return; }
 
+        setColumns(prev => {
+            const next = { ...prev};
+            next[sourceColumnId] = {
+                ...next[sourceColumnId],
+                applications: next[sourceColumnId].applications.filter(app => app.id !== id),
+            };
+            next[targetColumnId] = {
+                ...next[targetColumnId],
+                applications: [...next[targetColumnId].applications, { ...movedApp, status: targetColumnId }],
+            };
+            return next;
+        });
+
+        try {
+            await authRequest(`/api/applications/${id}`, {
+                method: "PATCH",
+                body: JSON.stringify({ status: targetColumnId.toUpperCase() }),
+            });
+        } catch (err) {
+            console.error("Failed to update status:", err);
+        }
+
+        setDraggedItem(null);
+    };
+
+    const removeTask = async (columnId: string, taskId: string) => {
+
+        setColumns(prev => ({
+            ...prev,
+            [columnId]: {
+                ...prev[columnId],
+                applications: prev[columnId].applications.filter(app => app.id !== taskId),
+            },
+        }));
+        try {
+            await authRequest(`/api/application/${taskId}`, { method: "DELETE" });
+        } catch (err) {
+            console.error("Failed to delete applications:", err);
+        }
+    };
 
     return (
-        <>
-            <ul>
-                {Object.entries(columns).map(([key, column]) => (
+        <ul style={{ display: "flex", gap: "1rem", listStyle: "none", padding: 0 }}>
+            {Object.entries(columns).map(([key, column]) => (
                 <li key={key}>
                     <KanbanColumn 
-                        data={column} 
-                        handleDrop={handleDrop}
-                        handleDragStart={handleDragStart}
-                        handleDragOver={handleDragOver}
+                        data={column}
+                        onDrop={handleDrop}
+                        onDragStart={handleDragStart}
+                        onDragOver={handleDragOver}
+                        onRemove={removeTask}
                     />
                 </li>
-                ))}
-            </ul>
-        </>
+            ))}
+        </ul>
     );
 }
