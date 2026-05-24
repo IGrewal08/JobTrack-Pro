@@ -6,6 +6,7 @@ import type { Application, Columns, DraggedObject } from "../../types";
 
 const COLUMN_KEYS = ["saved", "applied", "interviewing", "offers", "rejected", "withdrawn"];
 
+// Build columns with empty applications arrays, return an object with key-value for each key as application state
 const buildInitialColumns = (): Columns => 
     Object.fromEntries(
         COLUMN_KEYS.map(key => [key, { id: key, title: key.charAt(0).toUpperCase() + key.slice(1), applications: [] }])

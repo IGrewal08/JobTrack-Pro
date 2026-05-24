@@ -1,5 +1,3 @@
-export type Column = Application[];
-
 export type Application = {
     id: string;
     createdAt: string;
@@ -21,4 +19,18 @@ export type Columns = {
 export type DraggedObject = {
     id: string;
     columnId: string;
+}
+
+export type Job = {
+    id: string;
+    createdAt: string;
+    company: string;
+    location: string;
+    remote: boolean;
+    salaryMin: string | undefined;
+    salaryMax: string | undefined;
+    description: string;
+    url: string;
+    postedAt: string | undefined;
+    expiresAt: string | undefined;
 }
