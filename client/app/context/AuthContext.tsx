@@ -2,10 +2,15 @@ import { createContext, useContext } from "react";
 import { useAuth } from "../services/api";
 
 // Share user, token, and logout state across app
-const AuthContext = createContext(null);
-export function AuthProvider({ children }) { 
+const AuthContext = createContext<ReturnType<typeof useAuth> | null>(null);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) { 
     const auth = useAuth();
     return <AuthContext.Provider value={auth}>{children}</AuthContext.Provider>
 }
 
-export const useAuthContext = () => useContext(AuthContext);
+export function useAuthContext() {
+    const ctx = useContext(AuthContext);
+    if (!ctx) throw new Error("useAuthContext must be used inside AuthProvider");
+    return ctx;
+}

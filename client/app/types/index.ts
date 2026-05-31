@@ -23,14 +23,16 @@ export type DraggedObject = {
 
 export type Job = {
     id: string;
+    title: string;
     createdAt: string;
     company: string;
     location: string;
     remote: boolean;
-    salaryMin: string | undefined;
-    salaryMax: string | undefined;
+    salaryMin: number | undefined;
+    salaryMax: number | undefined;
     description: string;
     url: string;
     postedAt: string | undefined;
     expiresAt: string | undefined;
+    tags: string[];
 }
