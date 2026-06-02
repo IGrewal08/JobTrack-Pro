@@ -1,6 +1,6 @@
 import { type NextFunction, type Request, type Response } from "express";
 import { jobServices, parseType } from "../services/job.services.js";
-import crypto from "crypto";
+import { JobType } from "@prisma/client";
 
 export const jobController = {
     
@@ -16,11 +16,37 @@ export const jobController = {
 
     list: async (req: Request, res: Response, next: NextFunction) => {
         try {
+            const { search, remote, postedWithin, salaryMin, salaryMax, sort } = req.query;
+
+            const toArray = (v: unknown): string[] => {
+                if (Array.isArray(v)) return v as string[];
+                if (typeof v === "string") return [v];
+                return [];
+            };
+
+            const companies = toArray(req.query.company);
+            const locations = toArray(req.query.location);
+            const jobTypes = toArray(req.query.jobType).map(parseType)
+                .filter((v): v is JobType => v !== undefined);
+            const tags = toArray(req.query.tag);
+
+            const jobs = await jobServices.list({
+                search: typeof search === "string" ? search : undefined,
+                companies: companies.length ? companies : undefined,
+                locations: locations.length ? locations : undefined,
+                jobTypes: jobTypes.length  ? jobTypes  : undefined,
+                tags: tags.length      ? tags      : undefined,
+                remote: remote === "true" ? true : remote === "false" ? false : undefined,
+                salaryMin: salaryMin ? Number(salaryMin) : undefined,
+                salaryMax: salaryMax ? Number(salaryMax) : undefined,
+                postedWithin: postedWithin ? Number(postedWithin) : undefined,  // days
+                sort: typeof sort === "string" ? sort : "newest",
+            });
+
+            /*
             const rawTags = req.query.tags;
             const tags: string[] =
                 Array.isArray(rawTags) ? (rawTags as string[]) : typeof rawTags === "string" ? rawTags.split(",") : [];
-
-            const { title, company, location, salaryMin, salaryMax, postedAt, createdAt, expiresAt, jobType } = req.query;
 
             const remote =
                 req.query.remote === "true" ? true : req.query.remote === "false" ? false : undefined;
@@ -44,7 +70,7 @@ export const jobController = {
             );
 
             const jobs = await jobServices.list(cleanUpdateData);
-
+            */
             return res.status(200).json(jobs);
         } catch (err) {
             next(err);

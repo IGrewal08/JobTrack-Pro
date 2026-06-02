@@ -1,4 +1,4 @@
-import { JobType, Prisma, type Job } from "@prisma/client";
+import { JobType, Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma.js";
 
 export function parseType(value: unknown): JobType | undefined {
@@ -36,34 +36,49 @@ export const jobServices = {
     },
 
     list: async (filters: {
-        title?: string;
-        company?: string;
-        location?: string;
+        search?: string;
+        companies?: string[];
+        locations?: string[];
+        jobTypes?: JobType[];
+        tags?: string[];
+        remote?: boolean;
         salaryMin?: number;
         salaryMax?: number;
-        postedAt?: Prisma.SortOrder;
-        createdAt?: Prisma.SortOrder;
-        expiresAt?: Prisma.SortOrder;
-        jobType?: JobType;
-        remote?: boolean;
-        tags?: string[];
+        postedWithin?: number;
+        sort?: string;
     }) => {
+
+        const ORDER_MAP: Record<string, Prisma.JobOrderByWithRelationInput> = {
+            newest:     { createdAt: Prisma.SortOrder.desc },
+            oldest:     { createdAt: Prisma.SortOrder.asc  },
+            salaryDesc: { salaryMax: Prisma.SortOrder.desc },
+            salaryAsc:  { salaryMin: Prisma.SortOrder.asc  },
+        };
+
+        const orderBy = ORDER_MAP[filters.sort ?? "newest"] ?? ORDER_MAP.newest;
+
+        const postedAfter = filters.postedWithin
+            ? new Date(Date.now() - filters.postedWithin * 86400000)
+            : undefined;
+
         return prisma.job.findMany({
             where: {
-                ...(filters.title     && { title:   { contains: filters.title, mode: "insensitive" } }),
-                ...(filters.company   && { company: { contains: filters.company, mode: "insensitive" } }),
-                ...(filters.location  && { location: { contains: filters.location, mode: "insensitive" } }),
-                ...(filters.salaryMin && { salaryMin: { gte: filters.salaryMin } }),
-                ...(filters.salaryMax && { salaryMax: { lte: filters.salaryMax } }),
-                ...(filters.jobType   && { jobType: filters.jobType }),
-                ...(filters.remote !== undefined && { remote: filters.remote }),
-                ...(filters.tags && filters.tags.length > 0 && { tags: { hasSome: filters.tags } }),
+            ...(filters.search && {
+                OR: [
+                { title:       { contains: filters.search, mode: "insensitive" } },
+                { description: { contains: filters.search, mode: "insensitive" } },
+                ],
+            }),
+            ...(filters.companies?.length && { company:  { in: filters.companies } }),
+            ...(filters.locations?.length && { location: { in: filters.locations } }),
+            ...(filters.jobTypes?.length  && { jobType:  { in: filters.jobTypes  } }),
+            ...(filters.tags?.length      && { tags: { hasSome: filters.tags } }),
+            ...(filters.remote !== undefined && { remote: filters.remote }),
+            ...(filters.salaryMin && { salaryMin: { gte: filters.salaryMin } }),
+            ...(filters.salaryMax && { salaryMax: { lte: filters.salaryMax } }),
+            ...(postedAfter && { postedAt: { gte: postedAfter } }),
             },
-            orderBy: [
-                ...(filters.postedAt  ? [{ postedAt:  filters.postedAt  }] : []),
-                ...(filters.createdAt ? [{ createdAt: filters.createdAt }] : []),
-                ...(filters.expiresAt ? [{ expiresAt: filters.expiresAt }] : []),
-            ],
+            ...(orderBy && { orderBy }),
         });
     },
 
