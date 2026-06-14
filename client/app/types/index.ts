@@ -2,10 +2,13 @@ export type Application = {
     id: string;
     createdAt: string;
     updatedAt: string;
-    title: string;
-    company: string;
-    jobType: string;
     status: string;
+    interviewAt: string | undefined;
+    appliedAt: string | undefined;
+    offerAmount: number | undefined;
+    notes: string | undefined;
+    coverLetter: string | undefined;
+    job: Job;
 }
 
 export type Columns = {

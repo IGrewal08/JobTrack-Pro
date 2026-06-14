@@ -18,7 +18,6 @@ type ApplicationWriteDate = {
 }
 
 export const applicationService = {
-    
     getById: async (id: string) => {
         return prisma.application.findUnique({
             where: {

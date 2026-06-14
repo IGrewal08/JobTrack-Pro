@@ -26,7 +26,6 @@ type JobWriteData = {
 };
 
 export const jobServices = {
-
     getById: async (id: number) => {
         return prisma.job.findUnique({
             where: {

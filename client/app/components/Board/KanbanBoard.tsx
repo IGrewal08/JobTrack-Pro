@@ -32,7 +32,7 @@ export default function KanbanBoard({ applications }: Props) {
         });
     }, [applications]);
 
-    const handleDragStart = (e: DragEvent<HTMLLIElement>, id: string, columnId: string) => {
+    const handleDragStart = (_e: DragEvent<HTMLLIElement>, id: string, columnId: string) => {
         setDraggedItem({ id, columnId });
     };
 

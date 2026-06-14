@@ -34,43 +34,15 @@ export const jobController = {
                 search: typeof search === "string" ? search : undefined,
                 companies: companies.length ? companies : undefined,
                 locations: locations.length ? locations : undefined,
-                jobTypes: jobTypes.length  ? jobTypes  : undefined,
-                tags: tags.length      ? tags      : undefined,
+                jobTypes: jobTypes.length ? jobTypes  : undefined,
+                tags: tags.length ? tags : undefined,
                 remote: remote === "true" ? true : remote === "false" ? false : undefined,
                 salaryMin: salaryMin ? Number(salaryMin) : undefined,
                 salaryMax: salaryMax ? Number(salaryMax) : undefined,
-                postedWithin: postedWithin ? Number(postedWithin) : undefined,  // days
+                postedWithin: postedWithin ? Number(postedWithin) : undefined,
                 sort: typeof sort === "string" ? sort : "newest",
             });
 
-            /*
-            const rawTags = req.query.tags;
-            const tags: string[] =
-                Array.isArray(rawTags) ? (rawTags as string[]) : typeof rawTags === "string" ? rawTags.split(",") : [];
-
-            const remote =
-                req.query.remote === "true" ? true : req.query.remote === "false" ? false : undefined;
-
-            const rawUpdateData = {
-                title: typeof title === "string" ? title : undefined,
-                company: typeof company === "string" ? company : undefined,
-                location: typeof location === "string" ? location : undefined,
-                salaryMin: typeof salaryMin === "string" ? Number(salaryMin) : undefined,
-                salaryMax: typeof salaryMax === "string" ? Number(salaryMax) : undefined,
-                postedAt: postedAt === "asc" || postedAt === "desc" ? postedAt : undefined,
-                createdAt: createdAt === "asc" || createdAt === "desc" ? createdAt : undefined,
-                expiresAt: expiresAt === "asc" || expiresAt === "desc" ? expiresAt : undefined,
-                jobType: jobType ? parseType(req.query.type) : undefined,
-                remote,
-                tags,
-            }
-
-            const cleanUpdateData = Object.fromEntries(
-                Object.entries(rawUpdateData).filter(([_, value]) => value !== undefined)
-            );
-
-            const jobs = await jobServices.list(cleanUpdateData);
-            */
             return res.status(200).json(jobs);
         } catch (err) {
             next(err);
