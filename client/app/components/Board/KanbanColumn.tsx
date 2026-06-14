@@ -31,8 +31,8 @@ export function KanbanColumn({ data, onDrop, onDragStart, onDragOver, onRemove }
                         draggable
                         onDragStart={(e) => onDragStart(e, app.id, data.id)}
                     >
-                        <div>{app.title}</div>
-                        <div>{app.company}</div>
+                        <div>{app.job.title}</div>
+                        <div>{app.job.company}</div>
                         <div>{new Date(app.createdAt).toLocaleDateString()}</div>
                         <button onClick={() => onRemove(data.id, app.id)}>Remove</button>
                     </li>

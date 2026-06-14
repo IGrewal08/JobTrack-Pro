@@ -1,5 +1,7 @@
 const TOKEN_KEY = "token";
 
+const isBrowser = typeof window !== "undefined";
+
 // Get user or null
 export function decodeToken(token: string | null) {
     try {
@@ -20,9 +22,18 @@ export function isTokenExpired(token: string | null, bufferSeconds = 30) {
     return payload.exp - nowInSeconds < bufferSeconds;
 }
 
-export function storeToken(token: string | null) { if (!token) return null; localStorage.setItem(TOKEN_KEY, token); }
-export function loadToken():string | null { return localStorage.getItem(TOKEN_KEY); }
-export function clearToken() { localStorage.removeItem(TOKEN_KEY); }
+export function storeToken(token: string | null) { 
+    if (!isBrowser || !token) return;
+    localStorage.setItem(TOKEN_KEY, token); 
+}
+export function loadToken():string | null { 
+    if (!isBrowser) return null;
+    return localStorage.getItem(TOKEN_KEY); 
+}
+export function clearToken() { 
+    if (!isBrowser) return;
+    localStorage.removeItem(TOKEN_KEY); 
+}
 
 export function getValidToken(): null | string {
     const token = loadToken();

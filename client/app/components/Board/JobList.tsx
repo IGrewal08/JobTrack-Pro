@@ -85,7 +85,7 @@ export function JobList({ jobs }: Props) {
 function ListCard({ id, title, company, createdAt, tags, isSelected, onClick }: ListCard) {
     return (
         <div 
-            onClick={(e) => onClick(id)}
+            onClick={(_e) => onClick(id)}
             style={{ background: isSelected ? "#e6f1b" : "transparent", cursor: "pointer", padding: "0.5rem" }}
         >
             <h1>{title}</h1>

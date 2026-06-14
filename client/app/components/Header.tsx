@@ -10,7 +10,7 @@ export default function Header() {
                 Board
             </NavLink>
             <NavLink to="">
-                SignIn
+                Sign-In
             </NavLink>
         </>
     );
