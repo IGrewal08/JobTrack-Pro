@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import type { DragEvent } from "react";
 import { KanbanColumn } from "./KanbanColumn";
-import { useAuthContext } from "../../context/AuthContext";
 import type { Application, Columns, DraggedObject } from "../../types";
+import { authFetch } from "../../services/api";
 
 const COLUMN_KEYS = ["saved", "applied", "interviewing", "offers", "rejected", "withdrawn"];
 
@@ -12,10 +12,12 @@ const buildInitialColumns = (): Columns =>
         COLUMN_KEYS.map(key => [key, { id: key, title: key.charAt(0).toUpperCase() + key.slice(1), applications: [] }])
     );
 
-type Props = { applications: Application[] };
+type Props = { 
+    applications: Application[];
+    token: string;
+};
 
-export default function KanbanBoard({ applications }: Props) {
-    const { authRequest } = useAuthContext();
+export default function KanbanBoard({ applications, token }: Props) {
     const [columns, setColumns] = useState<Columns>(buildInitialColumns);
     const [draggedItem, setDraggedItem] = useState<DraggedObject | null>(null);
 
@@ -66,7 +68,7 @@ export default function KanbanBoard({ applications }: Props) {
         });
 
         try {
-            await authRequest(`/api/applications/${id}`, {
+            await authFetch(`/api/applications/${id}`, token, {
                 method: "PATCH",
                 body: JSON.stringify({ status: targetColumnId.toUpperCase() }),
             });
@@ -87,7 +89,7 @@ export default function KanbanBoard({ applications }: Props) {
             },
         }));
         try {
-            await authRequest(`/api/application/${taskId}`, { method: "DELETE" });
+            await authFetch(`/api/applications/${taskId}`, token, { method: "DELETE" });
         } catch (err) {
             console.error("Failed to delete applications:", err);
         }

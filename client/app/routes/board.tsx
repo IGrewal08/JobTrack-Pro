@@ -1,23 +1,23 @@
 import { useLoaderData } from "react-router";
 import KanbanBoard from "../components/Board/KanbanBoard";
-import { getValidToken } from "../services/util";
+import type { Route } from "../../.react-router/types/app/routes/+types/board";
 import type { Application } from "../types";
-import { API_BASE } from "../services/api";
+import { API_BASE, authFetch } from "../services/api";
 
-export async function loader() {
-    const token = getValidToken();
-    if (!token) throw new Response("Unauthorized", { status: 401 });
+import { requireToken } from "../services/session";
 
-    const res = await fetch(`${API_BASE}/api/applications/`, {
-        headers: { Authorization: `Bearer ${token}` },
-    });
+export async function loader({ request }: Route.LoaderArgs) {
+    const token = await requireToken(request);
+    
+    const res = await authFetch(`${API_BASE}/api/applications`, token);
 
     if (!res.ok) throw new Response("Failed to load applications", { status: res.status });
+
     const applications: Application[] = await res.json();
-    return { applications };
+    return { applications, token };
 }
 
 export default function BoardPage() {
-    const { applications } = useLoaderData<typeof loader>();
-    return <KanbanBoard applications={applications} />;
+    const { applications, token } = useLoaderData<typeof loader>();
+    return <KanbanBoard applications={applications} token={token} />;
 }

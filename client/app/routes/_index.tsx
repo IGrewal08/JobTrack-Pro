@@ -3,7 +3,7 @@ import { redirect } from "react-router";
 const isBrowser = typeof window !== "undefined";
 
 export async function loader() {
-    const user = await getUser(); // check for token
+    const user = await getUser();
     if (user) return redirect("/board");
     return redirect("/login");
 }

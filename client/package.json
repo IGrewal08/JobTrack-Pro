@@ -11,7 +11,8 @@
     "start": "react-router-serve ./build/server/index.js"
   },
   "dependencies": {
-    "@react-router/node": "^7.15.0",
+    "@react-router/node": "^7.17.0",
+    "dotenv": "^17.4.2",
     "isbot": "^5.1.42",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
@@ -22,7 +23,7 @@
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@react-router/dev": "^7.17.0",
-    "@types/node": "^24.12.3",
+    "@types/node": "^24.13.2",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",

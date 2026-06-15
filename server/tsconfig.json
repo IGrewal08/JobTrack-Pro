@@ -4,6 +4,7 @@
     // File Layout
     "outDir": "./dist",
     "rootDir": "./src",
+    "typeRoots": ["./src/types", "./node_modules/@types"],
     /* Paths are now relative to the tsconfig file location */
     "paths": {
       "@/*": ["./src/*"],
@@ -14,8 +15,9 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "esnext",
-    "types": [],
+    "types": ["node"],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
@@ -40,13 +42,13 @@
 
     // Recommended Options
     "strict": true,
-    "jsx": "react-jsx",
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
+    "esModuleInterop": true,
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "server/prisma.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { useAuthContext } from "../../context/AuthContext";
 import type { Job } from "../../types";
 import { JobCard } from "./JobCard";
+import { authFetch } from "../../services/api";
 
-type Props = { jobs: Job[] };
+type Props = { 
+    jobs: Job[];
+    token: string;
+};
 
 type ListCard = {
     id: string;
@@ -15,13 +18,12 @@ type ListCard = {
     onClick: (jobId: string) => void;
 };
 
-export function JobList({ jobs }: Props) {
-    const { authRequest } = useAuthContext();
+export function JobList({ jobs, token }: Props) {
     const [selectedJob, setSelectedJob] = useState<Job | null>(jobs[0] ?? null);
 
     const handleSave = async (formData: FormData, jobId: string) => {
         try {
-            await authRequest("/api/applications", {
+            await authFetch("/api/applications", token, {
                 method: "POST",
                 body: JSON.stringify({
                     jobId,
@@ -40,10 +42,10 @@ export function JobList({ jobs }: Props) {
 
     const handleDelete = async (jobId: string) => {
         try {
-            await authRequest(`/api/applications/${jobId}`, { method: "DELETE" });
+            await authFetch(`/api/applications/${jobId}`, token, { method: "DELETE" });
             if (selectedJob?.id === jobId) setSelectedJob(jobs[0] ?? null);
-        } catch (err) {
-            console.error("Failed to delete:", err);
+        } catch (err: any) {
+            console.error("Failed to delete:", err.message);
         }
     }
 

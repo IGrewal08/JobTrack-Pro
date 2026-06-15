@@ -1,10 +1,11 @@
 import { type NextFunction, type Request, type Response } from "express";
 import { jobServices, parseType } from "../services/job.services.js";
 import { JobType } from "@prisma/client";
+import type { AuthReq } from "@/middleware/auth.js";
 
 export const jobController = {
     
-    getById: async (req: Request, res: Response, next: NextFunction) => {
+    getById: async (req: AuthReq<{ id: string }>, res: Response, next: NextFunction) => {
         try {
             const job = await jobServices.getById(Number(req.params.id));
             if (!job) return res.status(404).json({ message: "Job not found." });
@@ -14,7 +15,7 @@ export const jobController = {
         }
     },
 
-    list: async (req: Request, res: Response, next: NextFunction) => {
+    list: async (req: AuthReq<{ query: string }>, res: Response, next: NextFunction) => {
         try {
             const { search, remote, postedWithin, salaryMin, salaryMax, sort } = req.query;
 
@@ -49,7 +50,7 @@ export const jobController = {
         }
     },
 
-    create: async (req: Request, res: Response, next: NextFunction) => {
+    create: async (req: AuthReq<{ id: string }, any>, res: Response, next: NextFunction) => {
         try {
             const { salaryMin, salaryMax, postedAt, expiresAt, jobType } = req.body;
 
@@ -86,7 +87,7 @@ export const jobController = {
         }
     },
 
-    update: async (req: Request, res: Response, next: NextFunction) => {
+    update: async (req: AuthReq<{ id: string }, any>, res: Response, next: NextFunction) => {
         try {
             const { salaryMin, salaryMax, postedAt, expiresAt, jobType } = req.body;
 
@@ -131,7 +132,7 @@ export const jobController = {
         }
     },
 
-    remove: async (req: Request, res: Response, next: NextFunction) => {
+    remove: async (req: AuthReq<{ id: string }>, res: Response, next: NextFunction) => {
         try {
             const id = req.params.id;
             if (!id) return res.status(401).json({ message: "Id is required." });

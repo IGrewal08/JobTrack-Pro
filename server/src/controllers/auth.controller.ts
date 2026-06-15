@@ -1,75 +1,94 @@
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import type { NextFunction, Request, Response } from "express";
-import { getAdmin } from "../services/auth.services.js";
+import { getUser } from "../services/auth.services.js";
 import { prisma } from "../config/prisma.js";
+import type { AuthReq } from "@/middleware/auth.js";
+
+const COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: 'strict' as const,
+    maxAge: 60 * 60 * 100,
+};
 
 export const authController = {
 
-    loginController: async (req: Request, res: Response, next: NextFunction) => {
+    loginController: async (req: AuthReq<{ id: string }, any>, res: Response, next: NextFunction) => {
         try {
             const { email, password } = req.body;
-            const user = await getAdmin(email);
-            if (!email) {
+            if (!email || !password) {
                 return res.status(401).json({ message: "Invalid Email or Password." });
             }
+
+            const user = await getUser(email);
             if (!user) {
                 return res.status(401).json({ message: "Authentication failed" });
             }
 
             const match: boolean = await bcrypt.compare(password, user.password);
-
             if (!match) {
                 return res.status(401).json({ message: "Invalid Email or Password." });
             }
 
-            jwt.sign(
+
+            const token = jwt.sign(
                 {
                     id: user.id,
+                    name: user.name,
                     role: user.role,
                 },
                     process.env.JWT_SECRET as string,
                 {
                     expiresIn: '1h'
-                },
-                (err, token) => {
-                    if (err) throw err;
-                    res.status(200).json({
-                        message: "Login Successful",
-                        token: token,
-                    });
                 }
             );
 
+            res.cookie('token', token, COOKIE_OPTIONS).status(200).json({ message: "Login successful." });
         } catch (err) {
-            console.error(err);
-            return res.status(401).json({ message: "Access Denied: Incorrect Username or Password! "});
+            next(err);
         }
     },
 
-    signUpController: async (req: Request, res: Response, next: NextFunction) => {
+    signUpController: async (req: AuthReq<{ id: string }, any>, res: Response, next: NextFunction) => {
         try {
-            const { email, user, password } = req.body;
-            const hashedPassword = await bcrypt.hash(password, 10);
 
-            if (!getAdmin(email)) return res.status(401).json({ message: "Authentication failed, Email in use." });
+            const { email, name, password } = req.body;
+            if (!email || !password) return res.status(400).json({ message: "Email or Password required for login." });
 
-            await prisma.user.create({
+            const existing = await getUser(email);
+
+            if (existing) {
+                return res.status(409).json({ message: "Email already in use." });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, await bcrypt.genSalt(10));
+
+            const newUser = await prisma.user.create({
                 data: {
                     email,
-                    ...(user && {user: user}),
-                    hashedPassword,
-                }
+                    password: hashedPassword,
+                    ...(name && { name }),
+                },
             });
+
+            const token = jwt.sign(
+                { id: newUser.id, name: newUser.name, role: newUser.role },
+                process.env.JWT_SECRET as string,
+                { expiresIn: '1h'},
+            );
+
+            return res.cookie('token', token, COOKIE_OPTIONS).status(201).json({ message: "User registered successfully." });
         } catch (err) {
-            console.error(err);
-            return res.status(401).json({ message: "Error Creating user account." });
+            next(err);
         }
     },
 
-    logoutController: async (req: Request, res: Response, next: NextFunction) => {
+    logoutController: async (req: AuthReq<{ id: string }>, res: Response, next: NextFunction) => {
         try {
             // Implement for Redis
+            return res.clearCookie("token", COOKIE_OPTIONS)
+                .status(200).json({ message: "Logged out successfully." });
         } catch (err) {
             next(err);
         }

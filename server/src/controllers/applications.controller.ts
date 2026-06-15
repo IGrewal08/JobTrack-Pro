@@ -1,16 +1,10 @@
 import type { NextFunction, Request, Response } from "express";
 import { applicationService, parseStatus } from "@/services/application.services.js";
-
-interface AuthRequest<T = any> extends Request<T> {
-    user?: {
-        id: string;
-        status?: string;
-    }
-}
+import type { AuthReq } from "@/middleware/auth.js";
 
 export const applicationController = {
 
-    getById: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    getById: async (req: AuthReq<{ id: string }>, res: Response, next: NextFunction) => {
         try {
             const id = req.params.id;
             if (!id) return res.status(201).json({ message: "" });
@@ -22,7 +16,7 @@ export const applicationController = {
         }
     },
     
-    list: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    list: async (req: AuthReq, res: Response, next: NextFunction) => {
         try {
             const userId = req.user?.id;
             if (!userId) return res.status(401).json({ message: "Unauthorized." });
@@ -58,7 +52,7 @@ export const applicationController = {
         }
     },
 
-    create: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    create: async (req: AuthReq, res: Response, next: NextFunction) => {
         try {
             const userId = req.user?.id;
             if (!userId) return res.status(401).json({ message: "Unauthorized." });
@@ -88,7 +82,7 @@ export const applicationController = {
     },
 
     
-    update: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    update: async (req: AuthReq<{ id: string }>, res: Response, next: NextFunction) => {
         try {
             const userId = req.user?.id;
             if (!userId) return res.status(401).json({ message: "Unauthorized." });
@@ -116,11 +110,12 @@ export const applicationController = {
         }
     },
 
-    remove: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    remove: async (req: AuthReq<{ id: string }>, res: Response, next: NextFunction) => {
         try {
             const userId = req.user?.id;
+            const id = req.params.id;
             if (!userId) return res.status(401).json({ message: "Unauthorized." });
-            await applicationService.remove(req.params.id, userId);
+            await applicationService.remove(id, userId);
 
             return res.status(204).send();
         } catch (err) {

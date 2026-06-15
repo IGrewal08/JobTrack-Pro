@@ -1,43 +1,20 @@
-import { useNavigate  } from "react-router";
-import { useState } from "react";
-import { useAuth } from "../../services/api";
+import { Form, useActionData, useNavigation  } from "react-router";
 
 export function LoginForm() {
-    const { login, loading, error } = useAuth();
-    const navigate = useNavigate();
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        await login(email, password);
-        if (!error) navigate('/board');
-    };
+    const actionData = useActionData<{ error?: string }>();
+    const navigation = useNavigation();
+    const isSubmitting = navigation.state === "submitting";
 
     return (
-        <form onSubmit={handleSubmit}>
-            {error && <p>{error}</p>}
+        <Form method="post">
+            {actionData?.error && <p>{actionData.error}</p>}
             <label htmlFor="email">Email</label>
-            <input 
-                type="email" 
-                id="email"
-                name="email"
-                value={email}
-                required
-                onChange={(e) => setEmail(e.target.value)}
-            />
+            <input id="email" name="email" type="email" required />
             <label htmlFor="password">Password</label>
-            <input 
-                type="password" 
-                id="password"
-                name="password"
-                value={password}
-                required
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button type="submit" disabled={loading}>
-                {loading ? "Loading in.." : "login"}
+            <input id="password" name="password" type="password" required />
+            <button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? "Logging in..." : "Login"}
             </button>
-        </form>
+        </Form>
     );
 }

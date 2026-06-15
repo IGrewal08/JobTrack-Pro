@@ -1,6 +1,6 @@
 import { prisma } from "../config/prisma.js";
 
-export const getAdmin = async (email: string) => {
+export const getUser = async (email: string) => {
     return await prisma.user.findUnique({
         where: { email }
     });
