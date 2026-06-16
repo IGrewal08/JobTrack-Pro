@@ -2,14 +2,14 @@ import { useLoaderData } from "react-router";
 import KanbanBoard from "../components/Board/KanbanBoard";
 import type { Route } from "../../.react-router/types/app/routes/+types/board";
 import type { Application } from "../types";
-import { API_BASE, authFetch } from "../services/api";
+import { authFetch } from "../services/api";
 
 import { requireToken } from "../services/session";
 
 export async function loader({ request }: Route.LoaderArgs) {
     const token = await requireToken(request);
     
-    const res = await authFetch(`${API_BASE}/api/applications`, token);
+    const res = await authFetch(`/api/applications`, token);
 
     if (!res.ok) throw new Response("Failed to load applications", { status: res.status });
 

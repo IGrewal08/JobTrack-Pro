@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 import type { NextFunction, Request, Response } from "express";
 import { getUser } from "../services/auth.services.js";
 import { prisma } from "../config/prisma.js";
-import type { AuthReq } from "@/middleware/auth.js";
+import type { AuthReq } from "../middleware/auth.js";
 
 const COOKIE_OPTIONS = {
     httpOnly: true,
@@ -52,7 +52,6 @@ export const authController = {
 
     signUpController: async (req: AuthReq<{ id: string }, any>, res: Response, next: NextFunction) => {
         try {
-
             const { email, name, password } = req.body;
             if (!email || !password) return res.status(400).json({ message: "Email or Password required for login." });
 

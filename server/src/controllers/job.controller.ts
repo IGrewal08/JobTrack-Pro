@@ -1,7 +1,7 @@
 import { type NextFunction, type Request, type Response } from "express";
 import { jobServices, parseType } from "../services/job.services.js";
 import { JobType } from "@prisma/client";
-import type { AuthReq } from "@/middleware/auth.js";
+import type { AuthReq } from "../middleware/auth.js";
 
 export const jobController = {
     

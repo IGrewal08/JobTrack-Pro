@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import { applicationService, parseStatus } from "@/services/application.services.js";
-import type { AuthReq } from "@/middleware/auth.js";
+import { applicationService, parseStatus } from "../services/application.services.js";
+import type { AuthReq } from "../middleware/auth.js";
 
 export const applicationController = {
 
@@ -45,7 +45,7 @@ export const applicationController = {
             );
 
             const applications = await applicationService.list(userId, cleanUpdateData);
-
+            console.log(applications);
             return res.status(200).json(applications);
         } catch (err) {
             next(err);
