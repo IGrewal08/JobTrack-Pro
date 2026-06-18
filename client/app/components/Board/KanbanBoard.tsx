@@ -4,6 +4,7 @@ import { KanbanColumn } from "./KanbanColumn";
 import type { Application, Columns, DraggedObject } from "../../types";
 import { authFetch } from "../../services/api";
 
+
 const COLUMN_KEYS = ["saved", "applied", "interviewing", "offers", "rejected", "withdrawn"];
 
 // Build columns with empty applications arrays, return an object with key-value for each key as application state
@@ -45,7 +46,6 @@ export default function KanbanBoard({ applications, token }: Props) {
     const handleDrop = async (e: DragEvent<HTMLDivElement>, targetColumnId: string) => {
         e.preventDefault();
 
-        // early return for no drop, or drop on same column
         if (!draggedItem || draggedItem.columnId !== targetColumnId) {
             setDraggedItem(null);
             return;
@@ -96,18 +96,20 @@ export default function KanbanBoard({ applications, token }: Props) {
     };
 
     return (
-        <ul style={{ display: "flex", gap: "1rem", listStyle: "none", padding: 0 }}>
-            {Object.entries(columns).map(([key, column]) => (
-                <li key={key}>
-                    <KanbanColumn 
-                        data={column}
-                        onDrop={handleDrop}
-                        onDragStart={handleDragStart}
-                        onDragOver={handleDragOver}
-                        onRemove={removeTask}
-                    />
-                </li>
-            ))}
-        </ul>
+        <main>
+            <ul style={{ display: "flex", gap: "0.5rem", listStyle: "none", padding: 0 }}>
+                {Object.entries(columns).map(([key, column]) => (
+                    <li key={key}>
+                        <KanbanColumn
+                            data={column}
+                            onDrop={handleDrop}
+                            onDragStart={handleDragStart}
+                            onDragOver={handleDragOver}
+                            onRemove={removeTask}
+                        />
+                    </li>
+                ))}
+            </ul>
+        </main>
     );
 }

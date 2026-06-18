@@ -22,7 +22,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
     if (!res.ok) {
         const body = await res.json().catch(() => ({}));
-        return { error: body.message ?? "Login failed" };
+        return { error: body.message ?? "Login failed, try again later." };
     }
 
     const setCookie = res.headers.get("Set-Cookie");

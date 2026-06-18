@@ -1,4 +1,6 @@
 import { useState } from "react";
+import styles from "../../styles/Dashboard.module.css";
+
 import { 
     Pie, PieChart,
     BarChart, Bar,
@@ -27,9 +29,10 @@ export default function StatsChart({ applications }: Props) {
     const [activeChart, setActiveChart] = useState<ChartKey>("status");
     
     return (
-        <div>
-            <h1>Charts</h1>
-            <label htmlFor="chart-select">View</label>
+        <div id={styles.stats_container}>
+            <h2>Charts</h2>
+            <div>
+                <label htmlFor="chart-select"></label>
                 <select 
                     id="chart-select"
                     value={activeChart}
@@ -39,12 +42,13 @@ export default function StatsChart({ applications }: Props) {
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                     ))}
                 </select>
-            <div style={{ marginTop: "1rem" }}>
+                <div style={{ marginTop: "1rem" }}>
                     {activeChart === "status" && <AppsStatus applications={applications} />}
                     {activeChart === "time" && <AppsOverTime applications={applications} />}
                     {activeChart === "rate" && <ResponseRate applications={applications} />}
                     {activeChart === "funnel" && <StageConversion applications={applications} />}
                     {activeChart === "response" && <TimeToRespond applications={applications} />}
+                </div>
             </div>
         </div>
     );
@@ -59,7 +63,7 @@ function AppsStatus({ applications }: Props) {
 
     const counts = applications.reduce<Record<string, number>>((acc, app) => {
         acc[app.status] = (acc[app.status] ?? 0) + 1;
-        return acc;  // fix: must return acc
+        return acc;
     }, {});
 
     const data = Object.entries(counts).map(([name, value]) => ({ 

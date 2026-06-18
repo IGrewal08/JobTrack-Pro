@@ -16,7 +16,6 @@ type Props = {
 }
 
 export function KanbanColumn({ data, onDrop, onDragStart, onDragOver, onRemove }: Props) {
-    // on click, go to job posting, on drag allow drag and drop
     return (
         <div 
             onDragOver={onDragOver}
@@ -24,6 +23,7 @@ export function KanbanColumn({ data, onDrop, onDragStart, onDragOver, onRemove }
             style={{ minWidth: "200px", minHeight: "300px" }}
         >
             <h3>{data.title}</h3>
+            <hr></hr>
             <ul style={{ listStyle: "none", padding: 0 }}>
                 {data.applications.map(app => (
                     <li 

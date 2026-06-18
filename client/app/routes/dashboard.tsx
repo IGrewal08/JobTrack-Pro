@@ -4,10 +4,12 @@ import { authFetch } from "../services/api";
 import type { Application } from "../types";
 import { requireToken } from "../services/session";
 import { StatCard } from "../components/Dashboard/StatCard";
+import styles from "../styles/Dashboard.module.css";
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const token = await requireToken(request);
-    const applications: Application[] = await authFetch("/api/applications", token);
+    // TEST DATA FOR APPLICATIONS
+    let applications: Application[] = await authFetch<Application[]>("/api/applications", token);
 
     const byStatus = applications.reduce<Record<string, number>>((acc, app) => {
         acc[app.status] = (acc[app.status] ?? 0) + 1;
@@ -17,7 +19,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const totalApplied = applications.filter(a => a.status !== "SAVED").length;
     const gotResponse = applications.filter(a => ["INTERVIEWING", "OFFER", "REJECTED"].includes(a.status)).length;
     const responseRate = totalApplied ? Math.round((gotResponse / totalApplied) * 100) : 0;
-
     const withResponse = applications.filter(a => a.appliedAt && a.interviewAt);
     const avgDays = withResponse.length ? 
         Math.round(
@@ -27,22 +28,56 @@ export async function loader({ request }: LoaderFunctionArgs) {
         )
     : null;
 
+    applications = [
+        {
+            id: "123",
+            createdAt: new Date().toJSON(),
+            updatedAt: new Date().toJSON(),
+            status: "OFFER",
+            interviewAt: new Date().toJSON(),
+            appliedAt: new Date().toJSON(),
+            offerAmount: 123456,
+            notes: "This is a note.",
+            coverLetter: "This is a coverLetter.",
+            job: {
+                id: "456",
+                title: "This is a Job Title",
+                createdAt: new Date().toJSON(),
+                company: "This is the company",
+                location: "This is the location",
+                remote: false,
+                salaryMin: 1234,
+                salaryMax: 56789,
+                description: "This is a description",
+                url: "www.example.com",
+                postedAt: new Date().toJSON(),
+                expiresAt: new Date().toJSON(),
+                tags: ["tag1", "tag2", "tag3"],
+
+            }
+        }
+    ];
     return { applications, byStatus, totalApplied, gotResponse, responseRate, avgDays, total: applications.length };
 }
 
 export default function DashboardPage() {
     const {  applications, byStatus, totalApplied, gotResponse, responseRate, avgDays, total } = useLoaderData<typeof loader>();
+    /**
+     * TEST DATA
+     */
     return (
-    <div>
-      <h1>Dashboard</h1>
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
-        <StatCard label="Total Applications" value={total} sub="all time" accent="#378ADD" />
-        <StatCard label="Response Rate" value={`${responseRate}%`} sub={`${gotResponse} of ${totalApplied}`} accent="#1D9E75" />
-        <StatCard label="Avg Days to Interview" value={avgDays ? `${avgDays} days` : "—"} 
-            sub={avgDays ? "days from apply to interview" : "no data yet"} accent="#BA7517"/>
-        <StatCard label="Active Applications" value={byStatus["INTERVIEWING"] ?? 0} sub="currently interviewing" accent="#639922" />
-      </div>
-      <StatsChart applications={applications} />
-    </div>
+        <main>
+        <h1>Dashboard</h1>
+            <div id={styles.container}>
+                <div id={styles.stat_cards} style={{ display: "flex", gap: "1rem", marginBottom: "2rem" }}>
+                    <StatCard label="Total Applications" value={total} sub="all time" accent="#378ADD" />
+                    <StatCard label="Response Rate" value={`${responseRate}%`} sub={`${gotResponse} of ${totalApplied}`} accent="#1D9E75" />
+                    <StatCard label="Avg Days to Interview" value={avgDays ? `${avgDays} days` : "—"} 
+                        sub={avgDays ? "days from apply to interview" : "no data yet"} accent="#BA7517"/>
+                    <StatCard label="Active Applications" value={byStatus["INTERVIEWING"] ?? 0} sub="currently interviewing" accent="#639922" />
+                </div>
+                <StatsChart applications={applications} />
+            </div>
+        </main>
   );
 }

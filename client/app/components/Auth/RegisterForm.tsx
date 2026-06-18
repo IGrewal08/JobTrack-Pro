@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { NavLink, useNavigate } from "react-router";
 import { API_BASE } from "../../services/api";
+import styles from "../../styles/Register.module.css";
 
 export function RegisterForm() {
     const navigate = useNavigate();
@@ -10,7 +11,7 @@ export function RegisterForm() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.SubmitEvent) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
@@ -33,37 +34,56 @@ export function RegisterForm() {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            {error && <p>{error}</p>}
-            <label htmlFor="name">Name</label>
-            <input 
-                type="text"
-                id="name"
-                name="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-            />
-            <label htmlFor="email">Email</label>
-            <input 
-                type="email" 
-                id="email"
-                name="email"
-                value={email}
-                required
-                onChange={(e) => setEmail(e.target.value)}
-            />
-            <label htmlFor="password">Password</label>
-            <input 
-                type="password" 
-                id="password"
-                name="password"
-                value={password}
-                required
-                onChange={(e) => setPassword(e.target.value)}
-            />
-            <button type="submit" disabled={loading}>
-                {loading ? "Registering..." : "Register"}
-            </button>
-        </form>
+        <main>
+            <div id={styles.register_form}>
+                <h5 style={{ color: "red" }}>{error && <p>{error}</p>}</h5>
+                <h2 style={{ marginBottom: "3rem", color: "royalblue" }}>Create You Account</h2>
+                <form id={styles.register_from} onSubmit={handleSubmit}>
+                    <label htmlFor="name">Name</label>
+                    <input 
+                        type="text"
+                        id="name"
+                        name="name"
+                        placeholder="Your Name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                    />
+                    <label htmlFor="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email"
+                        name="email"
+                        placeholder="@email"
+                        value={email}
+                        required
+                        onChange={(e) => setEmail(e.target.value)}
+                    />
+                    <label htmlFor="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password"
+                        name="password"
+                        placeholder="Password"
+                        value={password}
+                        required
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button id={styles.register} type="submit" disabled={loading}>
+                        {loading ? "Registering..." : "Register"}
+                    </button>
+                </form>
+                <hr></hr>
+                <h5 style={{ color: "slategray" }}>
+                    Already have an account?
+                    <NavLink 
+                        to="/login"
+                        style={{ textDecoration: "none", marginLeft: "0.5rem", fontWeight: "1px" }}
+                    >
+                        Sign In
+                    </NavLink>
+                </h5>
+            </div>
+            <div id={styles.graphic}></div>
+        </main>
     );
 }

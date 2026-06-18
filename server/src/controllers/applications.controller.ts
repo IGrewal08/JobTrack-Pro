@@ -45,7 +45,6 @@ export const applicationController = {
             );
 
             const applications = await applicationService.list(userId, cleanUpdateData);
-            console.log(applications);
             return res.status(200).json(applications);
         } catch (err) {
             next(err);

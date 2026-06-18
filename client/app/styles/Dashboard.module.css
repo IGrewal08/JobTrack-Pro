@@ -1,0 +1,56 @@
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: normal;
+    text-align: center;
+    gap: 2%;
+    padding: 0;
+}
+
+#container {
+    display: flex;
+    gap: 2%;
+}
+
+#stat_cards {
+    display: flex;
+    flex-direction: column;
+    padding: 4rem 2rem 0 2rem;
+    min-width: 15%;
+}
+
+#stat_cards > * {
+    overflow-y: hidden;
+    padding: 1rem;
+    height: 15%;
+    transition: all 0.5s ease-in-out;
+}
+
+#stat_cards > *:hover {
+    transform: scale(1.1);
+}
+
+#stats_container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    margin: 1.5rem;
+    margin-top: 0;
+}
+
+#stats_container > div > select {
+    padding: 0.5rem;
+    border: 1px solid white;
+    color: white;
+    border-radius: 1rem;
+    background-color: royalblue;
+    transition: all 0.4s ease-in;
+}
+
+#stats_container > div > select:hover {
+    background-color: white;
+    color: black;
+    border: 1px solid lightgray;
+}
+

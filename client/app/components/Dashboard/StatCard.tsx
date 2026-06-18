@@ -13,7 +13,7 @@ export function StatCard({ label, value, sub, accent = "#378ADD" }: Props) {
             padding: "1rem 1.25 rem",
             borderRadius: "8px",
             border: "0.5px solid #e0ddd6",
-            borderLeft: `4px solid ${accent}`,
+            borderLeft: `0.5rem solid ${accent}`,
             display: "flex",
             flexDirection: "column",
             gap: "4px",

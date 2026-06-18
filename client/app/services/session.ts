@@ -14,9 +14,7 @@ export function getTokenFromRequest(request: Request): string | null {
 
 // Get token or redirect to login
 export async function requireToken(request: Request): Promise<string> {
-    console.log(request);
     const token = getTokenFromRequest(request);
-    console.log(token);
     if (!token) throw redirect("/login");
     return token;
 }

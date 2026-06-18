@@ -9,7 +9,7 @@ import { requireToken } from "../services/session";
 export async function loader({ request }: LoaderFunctionArgs) {
     const token = await requireToken(request);
 
-    const jobs: Job[] = await authFetch("/api/jobs", token);
+    const jobs: Job[] = await authFetch<Job[]>("/api/jobs", token);
 
     const companies = [...new Set(jobs.map(j => j.company))];
     const locations = [...new Set(jobs.map(j => j.location).filter(Boolean))];
@@ -45,7 +45,7 @@ export default function JobsPage() {
     };
 
     return (
-        <div style={{ display: "flex", gap: "1rem" }}>
+        <div>
             <JobFilters 
                 companies={companies} 
                 locations={locations} 

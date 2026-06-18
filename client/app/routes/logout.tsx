@@ -1,7 +1,7 @@
 import { redirect, type ActionFunctionArgs } from "react-router";
 import { API_BASE } from "../services/api";
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function loader({ request }: ActionFunctionArgs) {
     const res = await fetch(`${API_BASE}/api/auth/logout`, {
         method: "POST",
         headers: {
@@ -10,7 +10,7 @@ export async function action({ request }: ActionFunctionArgs) {
     });
     
     const setCookie = res.headers.get("Set-Cookie");
-
+    
     throw redirect("/login", {
         headers: { 
             ...(setCookie && { "Set-Cookie": setCookie }),

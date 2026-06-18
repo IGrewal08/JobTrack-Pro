@@ -1,6 +1,10 @@
 export const API_BASE = "http://localhost:3000";
 
-export async function authFetch(path: string, token: string, options: RequestInit = {}) {
+export async function authFetch<T = any>(
+    path: string, 
+    token: string, 
+    options: RequestInit = {}
+): Promise<T> {
     const res = await fetch(`${API_BASE}${path}`, {
         ...options,
         headers: {
@@ -15,5 +19,5 @@ export async function authFetch(path: string, token: string, options: RequestIni
         throw new Error(body.message ?? `Request failed (${res.status})`);
     }
 
-    return res.json();
+    return res.json() as Promise<T>;
 }
