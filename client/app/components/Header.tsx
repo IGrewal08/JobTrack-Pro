@@ -6,6 +6,8 @@ export default function Header() {
 
     return (
         <header id={styles.header}>
+            <h5>JobTracker</h5>
+            <p>MENU</p>
             <NavLink 
                 to="/dashboard" 
                 id={styles.toDash} 
@@ -18,7 +20,7 @@ export default function Header() {
                 id={styles.toBoard} 
                 className={styles.links}
             >
-                Userboard
+                Applications
             </NavLink>
             <NavLink
                 to="/jobs"
@@ -27,27 +29,34 @@ export default function Header() {
             >
                 Jobs
             </NavLink>
+            <p>GENERAL</p>
+            <NavLink
+                to="/"
+                className={styles.links}
+            >
+                Settings
+            </NavLink>
             {(location.pathname == "/login") 
                 ? <NavLink 
                     to="/register" 
                     id={styles.toAuth} 
                     className={styles.links}>
                         Register
-                 </NavLink>
+                </NavLink>
                 :  (location.pathname != "/login" && location.pathname == "/register")
                     ? <NavLink 
                         to="/login" 
                         id={styles.toAuth} 
                         className={styles.links}>
                         Login
-                     </NavLink>
+                    </NavLink>
                     : <NavLink 
                         to="/logout"
                         id={styles.toAuth}
                         className={styles.links}
                     >
                         Logout
-                     </NavLink>
+                    </NavLink>
             }
         </header>
     );

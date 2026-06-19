@@ -1,6 +1,5 @@
 import { Links, Meta, Outlet, Scripts } from "react-router";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
+import styles from "./styles/Body.module.css";
 
 export default function Root() {
     return (
@@ -10,18 +9,17 @@ export default function Root() {
             height: "100%",
         }}>
             <head>
-                <Meta />
-                <Links />
+                <Meta /><Links />
             </head>
-            <body style={{ 
-                minHeight: "100dvh",
-                display: "flex", 
-                flexDirection: "column",
-                overflowX: "hidden",
-            }}>
-                <Header />
+            <body 
+                id={styles.body}
+                style={{
+                    minHeight: "100dvh",
+                    flexDirection: "column",
+                    overflowX: "hidden",
+                }}
+            >
                 <Outlet />
-                <Footer />
                 <Scripts />
             </body>
         </html>

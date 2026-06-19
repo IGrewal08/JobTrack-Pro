@@ -11,7 +11,7 @@ export function LoginForm() {
             <div id={styles.graphic}></div>
             <div id={styles.login_form}>
                 <h5 style={{ color: "red" }}>{actionData?.error && <p>{actionData.error}</p>}</h5>
-                <h2 style={{ marginBottom: "3rem", color: "royalblue" }}>Log-in To Your Account</h2>
+                <h2 style={{ marginBottom: "3rem", color: "#1F4A30" }}>Log-in To Your Account</h2>
                 <form method="post">
                     <label htmlFor="email">Email</label>
                     <input 

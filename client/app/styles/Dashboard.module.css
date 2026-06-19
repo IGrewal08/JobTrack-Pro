@@ -1,56 +1,88 @@
-main {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: normal;
-    text-align: center;
-    gap: 2%;
-    padding: 0;
+.main {
+  grid-area: 1 / 2 / 3 / 3;
+  display: flex;
+  flex-direction: column;
+  margin: 0.5rem;
+  padding: 1.5rem;
+  background-color: #F4F3EF;
+  border-radius: 1.5rem;
 }
 
-#container {
-    display: flex;
-    gap: 2%;
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
 }
 
-#stat_cards {
-    display: flex;
-    flex-direction: column;
-    padding: 4rem 2rem 0 2rem;
-    min-width: 15%;
+.pageTitle {
+  font-size: 32px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: #1A1A18;
 }
 
-#stat_cards > * {
-    overflow-y: hidden;
-    padding: 1rem;
-    height: 15%;
-    transition: all 0.5s ease-in-out;
+.pageSubtitle {
+  font-size: 14px;
+  color: #7A7972;
+  margin: 0;
 }
 
-#stat_cards > *:hover {
-    transform: scale(1.1);
+.statCards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
 }
 
-#stats_container {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    margin: 1.5rem;
-    margin-top: 0;
+.container {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 1rem;
 }
 
-#stats_container > div > select {
-    padding: 0.5rem;
-    border: 1px solid white;
-    color: white;
-    border-radius: 1rem;
-    background-color: royalblue;
-    transition: all 0.4s ease-in;
+.card {
+  background-color: #FFFFFF;
+  border-radius: 1.25rem;
+  padding: 1.5rem;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: transform 0.25s ease;
 }
 
-#stats_container > div > select:hover {
-    background-color: white;
-    color: black;
-    border: 1px solid lightgray;
+.card:hover {
+  transform: translateY(-2px);
 }
 
+.cardTitle {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: #1A1A18;
+}
+
+.pieCard {
+  grid-area: 1 / 1 / 2 / 2;
+}
+
+.barCard {
+  grid-area: 1 / 2 / 2 / 4;
+}
+
+.rateCard {
+  grid-area: 2 / 1 / 3 / 2;
+}
+
+.funnelCard {
+  grid-area: 2 / 2 / 3 / 3;
+}
+
+.respondCard {
+  grid-area: 2 / 3 / 3 / 4;
+  background-color: #1F4A30;
+}
+
+.respondCard .cardTitle {
+  color: #FFFFFF;
+}

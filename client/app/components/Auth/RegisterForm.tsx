@@ -37,7 +37,7 @@ export function RegisterForm() {
         <main>
             <div id={styles.register_form}>
                 <h5 style={{ color: "red" }}>{error && <p>{error}</p>}</h5>
-                <h2 style={{ marginBottom: "3rem", color: "royalblue" }}>Create You Account</h2>
+                <h2 style={{ marginBottom: "3rem", color: "#1F4A30" }}>Create You Account</h2>
                 <form id={styles.register_from} onSubmit={handleSubmit}>
                     <label htmlFor="name">Name</label>
                     <input 

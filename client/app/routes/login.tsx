@@ -27,7 +27,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
     const setCookie = res.headers.get("Set-Cookie");
 
-    throw redirect("/board", {
+    throw redirect("/dashboard", {
         headers: {
             ...(setCookie && { "Set-Cookie": setCookie }),
         },

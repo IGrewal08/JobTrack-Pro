@@ -1,0 +1,54 @@
+.card {
+  flex: 1;
+  min-width: 140px;
+  padding: 1.25rem 1.5rem;
+  border-radius: 1.25rem;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  gap: 6px;
+  background-color: #FFFFFF;
+  transition: transform 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+.card.accent {
+  background-color: #1F4A30;
+}
+
+.label {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #7A7972;
+}
+
+.card.accent .label {
+  color: #BFE0CB;
+}
+
+.value {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: #1A1A18;
+}
+
+.card.accent .value {
+  color: #FFFFFF;
+}
+
+.sub {
+  margin: 0;
+  font-size: 12px;
+  color: #9A998F;
+}
+
+.card.accent .sub {
+  color: #9FCBAB;
+}

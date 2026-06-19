@@ -1,115 +1,117 @@
 import { useEffect, useState } from "react";
 import type { DragEvent } from "react";
 import { KanbanColumn } from "./KanbanColumn";
+import styles from "../../styles/Kanban.module.css";
 import type { Application, Columns, DraggedObject } from "../../types";
 import { authFetch } from "../../services/api";
 
-
 const COLUMN_KEYS = ["saved", "applied", "interviewing", "offers", "rejected", "withdrawn"];
 
-// Build columns with empty applications arrays, return an object with key-value for each key as application state
-const buildInitialColumns = (): Columns => 
-    Object.fromEntries(
-        COLUMN_KEYS.map(key => [key, { id: key, title: key.charAt(0).toUpperCase() + key.slice(1), applications: [] }])
-    );
+const buildInitialColumns = (): Columns =>
+  Object.fromEntries(
+    COLUMN_KEYS.map(key => [key, { id: key, title: key.charAt(0).toUpperCase() + key.slice(1), applications: [] }])
+  );
 
-type Props = { 
-    applications: Application[];
-    token: string;
-};
+type Props = { applications: Application[]; token: string };
 
 export default function KanbanBoard({ applications, token }: Props) {
-    const [columns, setColumns] = useState<Columns>(buildInitialColumns);
-    const [draggedItem, setDraggedItem] = useState<DraggedObject | null>(null);
+  const [columns, setColumns] = useState<Columns>(buildInitialColumns);
+  const [draggedItem, setDraggedItem] = useState<DraggedObject | null>(null);
 
-    useEffect(() => {
-        const grouped: Record<string, Application[]> = Object.fromEntries(COLUMN_KEYS.map(k => [k, []]));
-        applications.forEach(app => {
-            const key = app.status.toLowerCase();
-            if (grouped[key]) grouped[key].push(app);
-        });
-        setColumns(prev => {
-            const next = { ...prev };
-            COLUMN_KEYS.forEach(key => { next[key] = { ...next[key], applications: grouped[key] }; });
-            return next;
-        });
-    }, [applications]);
+  useEffect(() => {
+    const grouped: Record<string, Application[]> = Object.fromEntries(COLUMN_KEYS.map(k => [k, []]));
+    applications.forEach(app => {
+      const key = app.status.toLowerCase();
+      if (grouped[key]) grouped[key].push(app);
+    });
+    setColumns(prev => {
+      const next = { ...prev };
+      COLUMN_KEYS.forEach(key => { next[key] = { ...next[key], applications: grouped[key] }; });
+      return next;
+    });
+  }, [applications]);
 
-    const handleDragStart = (_e: DragEvent<HTMLLIElement>, id: string, columnId: string) => {
-        setDraggedItem({ id, columnId });
-    };
+  const handleDragStart = (_e: DragEvent<HTMLLIElement>, id: string, columnId: string) => {
+    setDraggedItem({ id, columnId });
+  };
 
-    const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-    };
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
 
-    const handleDrop = async (e: DragEvent<HTMLDivElement>, targetColumnId: string) => {
-        e.preventDefault();
+  const handleDrop = async (e: DragEvent<HTMLDivElement>, targetColumnId: string) => {
+    e.preventDefault();
 
-        if (!draggedItem || draggedItem.columnId !== targetColumnId) {
-            setDraggedItem(null);
-            return;
-        }
-        const { id, columnId: sourceColumnId } = draggedItem;
-        const movedApp = columns[sourceColumnId]?.applications.find(app => app.id === id);
-        if (!movedApp) { setDraggedItem(null); return; }
+    if (!draggedItem || draggedItem.columnId === targetColumnId) {
+      setDraggedItem(null);
+      return;
+    }
 
-        setColumns(prev => {
-            const next = { ...prev};
-            next[sourceColumnId] = {
-                ...next[sourceColumnId],
-                applications: next[sourceColumnId].applications.filter(app => app.id !== id),
-            };
-            next[targetColumnId] = {
-                ...next[targetColumnId],
-                applications: [...next[targetColumnId].applications, { ...movedApp, status: targetColumnId }],
-            };
-            return next;
-        });
+    const { id, columnId: sourceColumnId } = draggedItem;
+    const movedApp = columns[sourceColumnId]?.applications.find(app => app.id === id);
+    if (!movedApp) { setDraggedItem(null); return; }
 
-        try {
-            await authFetch(`/api/applications/${id}`, token, {
-                method: "PATCH",
-                body: JSON.stringify({ status: targetColumnId.toUpperCase() }),
-            });
-        } catch (err) {
-            console.error("Failed to update status:", err);
-        }
+    setColumns(prev => {
+      const next = { ...prev };
+      next[sourceColumnId] = {
+        ...next[sourceColumnId],
+        applications: next[sourceColumnId].applications.filter(app => app.id !== id),
+      };
+      next[targetColumnId] = {
+        ...next[targetColumnId],
+        applications: [...next[targetColumnId].applications, { ...movedApp, status: targetColumnId }],
+      };
+      return next;
+    });
 
-        setDraggedItem(null);
-    };
+    try {
+      await authFetch(`/api/applications/${id}`, token, {
+        method: "PATCH",
+        body: JSON.stringify({ status: targetColumnId.toUpperCase() }),
+      });
+    } catch (err) {
+      console.error("Failed to update status:", err);
+    }
 
-    const removeTask = async (columnId: string, taskId: string) => {
+    setDraggedItem(null);
+  };
 
-        setColumns(prev => ({
-            ...prev,
-            [columnId]: {
-                ...prev[columnId],
-                applications: prev[columnId].applications.filter(app => app.id !== taskId),
-            },
-        }));
-        try {
-            await authFetch(`/api/applications/${taskId}`, token, { method: "DELETE" });
-        } catch (err) {
-            console.error("Failed to delete applications:", err);
-        }
-    };
+  const removeTask = async (columnId: string, taskId: string) => {
+    setColumns(prev => ({
+      ...prev,
+      [columnId]: {
+        ...prev[columnId],
+        applications: prev[columnId].applications.filter(app => app.id !== taskId),
+      },
+    }));
+    try {
+      await authFetch(`/api/applications/${taskId}`, token, { method: "DELETE" });
+    } catch (err) {
+      console.error("Failed to delete application:", err);
+    }
+  };
 
-    return (
-        <main>
-            <ul style={{ display: "flex", gap: "0.5rem", listStyle: "none", padding: 0 }}>
-                {Object.entries(columns).map(([key, column]) => (
-                    <li key={key}>
-                        <KanbanColumn
-                            data={column}
-                            onDrop={handleDrop}
-                            onDragStart={handleDragStart}
-                            onDragOver={handleDragOver}
-                            onRemove={removeTask}
-                        />
-                    </li>
-                ))}
-            </ul>
-        </main>
-    );
+  return (
+    <main className={styles.board}>
+      <div className={styles.boardHeader}>
+        <div>
+          <h1 className={styles.boardTitle}>Applications</h1>
+          <p className={styles.boardSubtitle}>Drag a card to update its status.</p>
+        </div>
+      </div>
+
+      <div className={styles.columnRow}>
+        {Object.entries(columns).map(([key, column]) => (
+          <KanbanColumn
+            key={key}
+            data={column}
+            onDrop={handleDrop}
+            onDragStart={handleDragStart}
+            onDragOver={handleDragOver}
+            onRemove={removeTask}
+          />
+        ))}
+      </div>
+    </main>
+  );
 }

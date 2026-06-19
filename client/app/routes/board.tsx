@@ -10,7 +10,6 @@ export async function loader({ request }: Route.LoaderArgs) {
     const token = await requireToken(request);
     
     const res = await authFetch<Application[]>(`/api/applications`, token);
-    //if (!res.ok) throw new Response("Failed to load applications", { status: res.status });
 
     const applications: Application[] = res;
     return { applications, token };
